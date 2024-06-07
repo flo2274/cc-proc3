@@ -8,13 +8,10 @@ const crypto = require("crypto");
 const app = express();
 const port = process.env.PORT || 3000;
 
-// Middleware, um JSON-Daten im Anfrage-Body zu parsen
 app.use(express.json());
 
-// Pfad zur JSON-Datei
 const dataFilePath = path.join(__dirname, "data.json");
 
-// Hilfsfunktion, um Daten aus der JSON-Datei zu lesen
 const readData = () => {
   if (!fs.existsSync(dataFilePath)) {
     return [];
@@ -23,7 +20,6 @@ const readData = () => {
   return JSON.parse(rawData);
 };
 
-// Hilfsfunktion, um Daten in die JSON-Datei zu schreiben
 const writeData = (data) => {
   fs.writeFileSync(dataFilePath, JSON.stringify(data, null, 2));
 };
@@ -37,7 +33,6 @@ const authenticate = (req, res, next) => {
     return res.status(401).send("Unauthorized: No token provided");
   }
 
-  // Hier können Sie die Logik zur Überprüfung des Tokens hinzufügen
   const validToken = process.env.BEARER_TOKEN || "mySecretToken";
 
   if (token !== validToken) {
