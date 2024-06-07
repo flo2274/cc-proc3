@@ -38,7 +38,6 @@ Thumbs.db
 
 # Docker files
 Dockerfile
-.dockerignore
 
 # Editor directories and files
 .vscode/
