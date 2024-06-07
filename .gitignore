@@ -6,8 +6,6 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# Environment variables
-.env
 
 # Logs
 logs
@@ -36,8 +34,6 @@ Thumbs.db
 # Output of 'npm pack'
 *.tgz
 
-# Docker files
-Dockerfile
 
 # Editor directories and files
 .vscode/
