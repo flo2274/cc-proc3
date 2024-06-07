@@ -1,6 +1,9 @@
+require("dotenv").config();
+
 const express = require("express");
 const fs = require("fs");
 const path = require("path");
+const crypto = require("crypto");
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -45,22 +48,33 @@ const authenticate = (req, res, next) => {
 };
 
 // Route zum Hinzufügen eines neuen URL-Slugs mit Authentifizierung
-app.post("/add-url", authenticate, (req, res) => {
+app.post("/entry", authenticate, (req, res) => {
   const { slug, url } = req.body;
 
-  if (!slug || !url) {
-    return res.status(400).send("slug and url are required");
+  if (!url) {
+    return res.status(400).send("url is required");
+  }
+
+  let newSlug = slug;
+  if (!newSlug) {
+    newSlug = crypto.randomBytes(4).toString("hex");
   }
 
   const data = readData();
-  data.push({ slug, url });
+  data.push({ slug: newSlug, url });
   writeData(data);
 
-  res.status(201).send("URL added successfully");
+  res.status(201).send({ message: "URL added successfully", slug: newSlug });
 });
 
-// Route zum Abrufen einer URL anhand des Slugs
-app.get("/url/:slug", (req, res) => {
+// Route zum Abrufen aller URL-Slugs mit Authentifizierung
+app.get("/entries", authenticate, (req, res) => {
+  const data = readData();
+  res.json(data);
+});
+
+// Route zum Abrufen einer URL anhand des Slugs und Umleiten
+app.get("/:slug", (req, res) => {
   const { slug } = req.params;
   const data = readData();
   const entry = data.find((item) => item.slug === slug);
@@ -69,7 +83,22 @@ app.get("/url/:slug", (req, res) => {
     return res.status(404).send("URL not found");
   }
 
-  res.send(entry.url);
+  res.redirect(entry.url);
+});
+
+// Route zum Löschen eines Eintrags anhand des Slugs mit Authentifizierung
+app.delete("/entry/:slug", authenticate, (req, res) => {
+  const { slug } = req.params;
+  let data = readData();
+  const initialLength = data.length;
+  data = data.filter((item) => item.slug !== slug);
+
+  if (data.length === initialLength) {
+    return res.status(404).send("URL not found");
+  }
+
+  writeData(data);
+  res.status(200).send("URL deleted successfully");
 });
 
 app.listen(port, () => {
